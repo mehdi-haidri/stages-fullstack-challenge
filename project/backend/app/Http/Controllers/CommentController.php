@@ -75,8 +75,8 @@ class CommentController extends Controller
         # Nettoyage avant sauvegarde (Sanitization) : supprimer toutes les balises HTML des commentaires avant de les enregistrer
 
         $content = strip_tags($request->input('content'));
-
-        $comment->update($content);
+        $validated['content'] = $content;
+        $comment->update($validated);
 
         return response()->json($comment);
     }
