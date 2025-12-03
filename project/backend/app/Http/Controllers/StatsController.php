@@ -20,11 +20,12 @@ class StatsController extends Controller
 
         $mostCommented = Article::select('articles.*', DB::raw('COUNT(comments.id) as comments_count'))
             ->leftJoin('comments', 'articles.id', '=', 'comments.article_id')
-            ->groupBy('articles.id', 'articles.title', 'articles.content', 'articles.author_id', 
+            ->groupBy('articles.id', 'articles.title', 'articles.content', 'articles.author_id',
                       'articles.image_path', 'articles.published_at', 'articles.created_at', 'articles.updated_at')
             ->orderBy('comments_count', 'desc')
             ->limit(5)
             ->get();
+
 
         $recentArticles = Article::with('author')
             ->orderBy('created_at', 'desc')
