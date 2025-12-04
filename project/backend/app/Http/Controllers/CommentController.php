@@ -32,9 +32,12 @@ class CommentController extends Controller
             'content' => 'required|string',
         ]);
 
+        # Nettoyage avant sauvegarde (Sanitization) : supprimer toutes les balises HTML des commentaires avant de les enregistrer
+
+        $content = strip_tags($request->input('content'));
+        $validated['content'] = $content;
         $comment = Comment::create($validated);
         $comment->load('user');
-
         return response()->json($comment, 201);
     }
 
@@ -69,6 +72,10 @@ class CommentController extends Controller
             'content' => 'required|string',
         ]);
 
+        # Nettoyage avant sauvegarde (Sanitization) : supprimer toutes les balises HTML des commentaires avant de les enregistrer
+
+        $content = strip_tags($request->input('content'));
+        $validated['content'] = $content;
         $comment->update($validated);
 
         return response()->json($comment);

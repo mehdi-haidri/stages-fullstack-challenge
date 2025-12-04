@@ -27,6 +27,10 @@ WORKDIR /var/www/html
 
 # Copy application files
 COPY . /var/www/html
+# **********************************************
+# 🌟 REQUIRED FIX: INSTALL COMPOSER DEPENDENCIES
+# **********************************************
+RUN composer install
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
