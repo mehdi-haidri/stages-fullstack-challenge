@@ -16,11 +16,14 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-RUN echo "upload_max_filesize = 2M" > /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size = 2M" >> /usr/local/etc/php/conf.d/uploads.ini
+# 💡BUG-003 fix : update the limit  from 2M to 10M in the config file direcly
+RUN echo "upload_max_filesize = 10M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_input_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 
 # Set working directory
 WORKDIR /var/www/html

@@ -13,9 +13,14 @@ class ImageUploadController extends Controller
      */
     public function upload(Request $request)
     {
+
+        // BUG-003 FIX: Align Laravel validation (initially 20MB)
+        // with the actual PHP Dockerfile limit (10MB) for consistent error messages.
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:20480',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // 10240 KB = 10MB
         ]);
+
+        logger($request);
 
         if (!$request->hasFile('image')) {
             return response()->json(['error' => 'No image provided'], 400);
@@ -24,7 +29,7 @@ class ImageUploadController extends Controller
         $image = $request->file('image');
         $filename = Str::random(20) . '.' . $image->getClientOriginalExtension();
         $path = $image->storeAs('images', $filename, 'public');
-        
+
         return response()->json([
             'message' => 'Image uploaded successfully',
             'path' => $path,
