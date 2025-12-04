@@ -52,7 +52,9 @@ class CommentController extends Controller
         $comment->delete();
 
         $remainingComments = Comment::where('article_id', $articleId)->get();
-        $firstComment = $remainingComments[0];
+        // CORRECTION BUG-002: L'accès direct à [0] sur une collection vide provoque une erreur.
+        // Nous utilisons ->first() qui retourne le premier élément ou null si la collection est vide.
+        $firstComment = $remainingComments->first();
 
         return response()->json([
             'message' => 'Comment deleted successfully',
