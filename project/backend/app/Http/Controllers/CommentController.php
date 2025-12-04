@@ -52,8 +52,8 @@ class CommentController extends Controller
         $comment->delete();
 
         $remainingComments = Comment::where('article_id', $articleId)->get();
-        // CORRECTION BUG-002: L'accès direct à [0] sur une collection vide provoque une erreur.
-        // Nous utilisons ->first() qui retourne le premier élément ou null si la collection est vide.
+        // CORRECTION BUG-002:  direct  access to  [0] in aan empty array produce an error.
+        // we use ->first() that returns the first element if exist and null otherwise.
         $firstComment = $remainingComments->first();
 
         return response()->json([
