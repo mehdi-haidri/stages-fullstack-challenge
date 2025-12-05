@@ -8,15 +8,21 @@ function ArticleCard({ article, onDelete }) {
     if (!dateString) return 'N/A';
     
     const date = new Date(dateString);
-    
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'America/Los_Angeles'
-    });
+
+      // 1. CHANGE LOCALE to 'fr-FR'
+      // 2. CHANGE TIMEZONE to 'Europe/Paris'
+      // Note: Le format par défaut 'fr-FR' donne JJ/MM/AAAA.
+
+      return date.toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Europe/Paris'
+      });
+
+
   };
 
   return (
