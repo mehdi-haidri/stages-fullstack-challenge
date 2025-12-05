@@ -72,18 +72,18 @@ class ArticleController extends Controller
             return response()->json([]);
         }
 
-        $articles = DB::select(
-            "SELECT * FROM articles WHERE title LIKE '%" . $query . "%'"
-        );
+        // [SEC-002] Security Fix: use elequant to handle querys insted of manually writing sql.
+        $articles = Article::where('title', 'like', '%' . $query . '%')->get();
 
-        $results = array_map(function ($article) {
+        // use the built-in function map in the returned  collection from elequant
+        $results = $articles->map(function ($article) {
             return [
                 'id' => $article->id,
                 'title' => $article->title,
                 'content' => substr($article->content, 0, 200),
                 'published_at' => $article->published_at,
             ];
-        }, $articles);
+        });
 
         return response()->json($results);
     }
