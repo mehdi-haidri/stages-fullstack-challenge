@@ -67,7 +67,8 @@ return [
     |
     */
 
-    'timezone' => 'America/Los_Angeles',
+    // FIX BUG-004: Setting the timezone to Europe/Paris to display dates correctly for French users.
+    'timezone' => 'Europe/Paris',
 
     /*
     |--------------------------------------------------------------------------
@@ -80,7 +81,8 @@ return [
     |
     */
 
-    'locale' => 'en',
+    // FIX BUG-004: Setting the locale to French.
+    'locale' => 'fr',
 
     /*
     |--------------------------------------------------------------------------
