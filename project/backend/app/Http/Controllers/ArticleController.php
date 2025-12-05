@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ArticleController extends Controller
 {
@@ -13,7 +14,29 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
-        $articles = Article::all();
+
+
+        if (app()->environment('local')) {
+            DB::listen(function ($query) {
+                // 1. Log the query
+                Log::info(
+                    "Query executed: {$query->sql}",
+                    [
+                        'bindings' => $query->bindings,
+                        'time_ms' => $query->time,
+                        'connection' => $query->connectionName,
+                    ]
+                );
+
+                // 2. Dump the query to the browser (only useful for development/debugging)
+                // dump("SQL: " . $query->sql);
+                // dump("Bindings: " . json_encode($query->bindings));
+                // dump("Time: " . $query->time . "ms");
+            });
+        }
+
+        //  [PERF-001] fix : Eager load the 'author' and 'comments' relationships
+        $articles = Article::with(['author', 'comments'])->get();
 
         $articles = $articles->map(function ($article) use ($request) {
             if ($request->has('performance_test')) {
