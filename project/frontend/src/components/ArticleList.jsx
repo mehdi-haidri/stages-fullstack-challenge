@@ -29,6 +29,7 @@ function ArticleList({ searchQuery }) {
       const endTime = performance.now();
       const timeInMs = (endTime - startTime).toFixed(0);
       setLoadTime(timeInMs);
+
       setArticles(response.data);
     } catch (err) {
       setError('Erreur lors du chargement des articles');
