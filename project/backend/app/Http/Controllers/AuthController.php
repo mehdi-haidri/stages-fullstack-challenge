@@ -23,8 +23,10 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
-
-        if ($user->password !== $credentials['password']) {
+        // [SEC-001] Security Fix: Use Hash::check() to verify the password.
+        // This compares the plain-text password from the request against the hashed password in the DB.
+        // We NEVER compare plain text passwords directly (e.g., $user->password === $request->password).
+        if (!Hash::check($credentials['password'], $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
@@ -49,10 +51,15 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
+        // [SEC-001] Security Fix: Hash the password before storing it.
+        // We use Laravel's Hash::make() which defaults to Bcrypt (or Argon2 if configured).
+        // Storing plain text passwords is a critical security vulnerability.
+        $password_hashed = Hash::make($validated['password']);
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => $validated['password'],
+            'password' => $password_hashed,
         ]);
 
         return response()->json([
@@ -71,7 +78,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $userId = $request->input('user_id');
-        
+
         if (!$userId) {
             return response()->json(['message' => 'Not authenticated'], 401);
         }
