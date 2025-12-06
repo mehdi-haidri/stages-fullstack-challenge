@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { uploadImage } from '../services/api';
 
+
+const dimensions = {
+    thumb: { width: 300, height: 200 },
+    medium: { width: 800, height: 533 },
+    large: { width: 1200, height: 800 }
+};
+
 function ImageUpload() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [imageUrls , setImageUrls] = useState(null);
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -35,12 +43,14 @@ function ImageUpload() {
 
     try {
       const response = await uploadImage(formData);
-      setMessage(`✅ Image uploadée avec succès ! (${(response.data.size / 1024).toFixed(0)} KB)`);
+      setMessage(`✅ Image uploadée avec succès ! (${(response.data.max_size / 1024).toFixed(0)} KB)`);
       setUploadedImage(response.data);
       setSelectedFile(null);
+
+      setImageUrls(response.data.urls)
     } catch (err) {
       if (err.response?.status === 413) {
-        setError('❌ Erreur 413 : Image trop volumineuse ! La limite est de 2MB.');
+        setError('❌ Erreur 413 : Image trop volumineuse ! La limite est de 10 MB.');
       } else {
         setError(`❌ Erreur lors de l'upload : ${err.message}`);
       }
@@ -95,9 +105,48 @@ function ImageUpload() {
         }}>
           <strong>Détails :</strong>
           <div>Path: {uploadedImage.path}</div>
-          <div>Size: {(uploadedImage.size / 1024).toFixed(2)} KB</div>
+          <div>Size: {(uploadedImage.max_size/ 1024).toFixed(2)} KB</div>
         </div>
       )}
+        {  imageUrls && <div style={{ padding: '0.8rem' }}>
+            <strong>Uploaded images (Optimized):</strong>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+
+
+                <picture>
+
+                    <source
+                        type="image/webp"
+
+                         srcSet={`${imageUrls.thumb.webp} ${dimensions.thumb.width}w, 
+                         ${imageUrls.medium.webp} ${dimensions.medium.width}w, 
+                         ${imageUrls.large.webp} ${dimensions.large.width}w`}
+
+                        sizes="(max-width: 600px) 300px,
+                       (max-width: 1000px) 800px,
+                       1200px"
+                    />
+
+                    <img
+                        srcSet={`${imageUrls.thumb.jpg} ${dimensions.thumb.width}w, 
+                         ${imageUrls.medium.jpg} ${dimensions.medium.width}w, 
+                         ${imageUrls.large.jpg} ${dimensions.large.width}w`}
+
+                        src={imageUrls["large"]}
+                        alt="Image optimized for performance"
+                        width={dimensions["large"].width}
+                        height={dimensions["large"].height}
+                        loading="lazy"
+                        style={{ maxWidth: '100%', height: 'auto' }}
+                    />
+                </picture>
+
+            </div>
+
+        </div> }
+
+
 
       <button 
         onClick={handleUpload} 
@@ -119,7 +168,6 @@ function ImageUpload() {
           Annuler
         </button>
       )}
-
       <div style={{ 
         marginTop: '1.5rem', 
         padding: '1rem', 
