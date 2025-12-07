@@ -3,22 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ArticleController extends Controller
 {
     /**
-     * Display a listing of articles.
+     * Display a listing of articles, utilizing Redis caching (PERF-003)
+     * and eager loading (PERF-001).
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-
+        $isPerformanceTest = $request->has('performance_test');
+        $cacheKey = 'articles_list';
+        $cacheDuration = 60;
 
         if (app()->environment('local')) {
             DB::listen(function ($query) {
-                // 1. Log the query
                 Log::info(
                     "Query executed: {$query->sql}",
                     [
@@ -27,20 +34,18 @@ class ArticleController extends Controller
                         'connection' => $query->connectionName,
                     ]
                 );
-
-                // 2. Dump the query to the browser (only useful for development/debugging)
-                // dump("SQL: " . $query->sql);
-                // dump("Bindings: " . json_encode($query->bindings));
-                // dump("Time: " . $query->time . "ms");
             });
         }
 
-        //  [PERF-001] fix : Eager load the 'author' and 'comments' relationships
-        $articles = Article::with(['author', 'comments'])->get();
+        $articles = Cache::remember($cacheKey, $cacheDuration, function () {
+            return Article::with(['author', 'comments'])->get();
+        });
 
-        $articles = $articles->map(function ($article) use ($request) {
-            if ($request->has('performance_test')) {
-                usleep(30000); // 30ms par article pour simuler le coût du N+1
+
+
+        $articles = $articles->map(function ($article) use ($isPerformanceTest) {
+            if ($isPerformanceTest) {
+                usleep(30000);
             }
 
             return [
