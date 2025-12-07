@@ -1,0 +1,3 @@
+# Ignore the symlink created by storage:link,
+# as it will be recreated in the entrypoint script at runtime.
+public/storage
