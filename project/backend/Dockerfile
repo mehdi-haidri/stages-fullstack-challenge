@@ -75,9 +75,6 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 # Make the script executable
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# 💡 FIX: Use sed to remove the "return" line if it exists (caused by bad line endings/Git conversion)
-# 'sed -i' edits the file in place. '/^return/d' finds lines starting with 'return' and deletes them.
-RUN sed -i '/^return/d' /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
 # Use the script as the entrypoint
