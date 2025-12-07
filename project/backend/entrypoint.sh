@@ -10,4 +10,3 @@ ln -s /var/www/html/storage/app/public /var/www/html/public/storage
 
 # 4. Execute the main container command (starting the web server)
 exec "$@"
-EOF
