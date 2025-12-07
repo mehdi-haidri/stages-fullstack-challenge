@@ -69,11 +69,21 @@ RUN echo '<VirtualHost *:80>\n\
     ErrorLog ${APACHE_LOG_DIR}/error.log\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
-# Copy the entrypoint script into the container
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Make the script executable
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# link the storage
+# Copy the entrypoint script into the container
+RUN printf "#!/bin/bash\n\
+# entrypoint.sh\n\
+\n\
+sleep 1\n\
+\n\
+php -r \"if (file_exists('/var/www/html/public/storage')) unlink('/var/www/html/public/storage');\"\n\
+\n\
+ln -s ../storage/app/public /var/www/html/public/storage\n\
+\n\
+exec \"\$@\"\n\
+" > /usr/local/bin/entrypoint.sh && \
+chmod +x /usr/local/bin/entrypoint.sh
 
 
 EXPOSE 80
